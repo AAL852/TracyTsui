@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="PaperWiper">
+<meta name="theme-color" content="#0f0f1e">
+<title>PaperWiper — Clean Exam Papers</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:       #0f0f1e;
+  --surface:  #181830;
+  --surface2: #1e1e38;
+  --border:   #2e2e52;
+  --accent:   #6c63ff;
+  --accent2:  #ff6584;
+  --green:    #43d9a2;
+  --text:     #e8e8f0;
+  --muted:    #6e6e90;
+  --radius:   16px;
+}
+
+html, body {
+  min-height: 100dvh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 16px 40px;
+}
+
+/* ── Header ───────────────────────────────────────── */
+header {
+  width: 100%;
+  max-width: 560px;
+  padding: 32px 0 24px;
+  text-align: center;
+}
+
+.logo-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px; height: 56px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border-radius: 16px;
+  font-size: 26px;
+  margin-bottom: 14px;
+  box-shadow: 0 8px 32px rgba(108,99,255,0.35);
+}
+
+h1 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+h1 span { color: var(--accent); }
+
+.tagline {
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin-top: 4px;
+}
+
+/* ── Card ─────────────────────────────────────────── */
+.card {
+  width: 100%;
+  max-width: 560px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin-bottom: 16px;
+}
+
+.card-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+
+/* ── Upload zone ──────────────────────────────────── */
+#drop-zone {
+  border: 2px dashed var(--border);
+  border-radius: 12px;
+  padding: 40px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  position: relative;
+}
+
+#drop-zone.drag-over {
+  border-color: var(--accent);
+  background: rgba(108,99,255,0.06);
+}
+
+#drop-zone .icon {
+  font-size: 2.5rem;
+  margin-bottom: 12px;
+  display: block;
+}
+
+#drop-zone .primary-text {
+  font-weight: 600;
+  font-size: 1rem;
+  margin-bottom: 4px;
+}
+
+#drop-zone .secondary-text {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+#drop-zone input[type=file] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+}
+
+/* ── File pill ────────────────────────────────────── */
+#file-pill {
+  display: none;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin-top: 16px;
+}
+
+#file-pill .file-icon { font-size: 1.6rem; }
+
+#file-pill .file-info { flex: 1; min-width: 0; }
+#file-pill .file-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#file-pill .file-size { color: var(--muted); font-size: 0.78rem; }
+
+#file-pill .remove-btn {
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 1.1rem;
+  padding: 4px;
+  border-radius: 6px;
+  transition: color 0.15s;
+}
+#file-pill .remove-btn:hover { color: var(--accent2); }
+
+/* ── Button ───────────────────────────────────────── */
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  border: none;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+  margin-top: 16px;
+}
+
+.btn:active { transform: scale(0.98); }
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent), #8b5cf6);
+  color: #fff;
+  box-shadow: 0 4px 20px rgba(108,99,255,0.3);
+}
+
+.btn-primary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-ghost {
+  background: var(--surface2);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+/* ── Progress ─────────────────────────────────────── */
+#progress-card { display: none; }
+
+.progress-bar-wrap {
+  background: var(--surface2);
+  border-radius: 99px;
+  height: 8px;
+  overflow: hidden;
+  margin: 12px 0;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--green));
+  border-radius: 99px;
+  transition: width 0.4s ease;
+  width: 0%;
+}
+
+.progress-label {
+  display: flex;
+  justify-content: space-between;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.spinner {
+  display: inline-block;
+  width: 16px; height: 16px;
+  border: 2px solid rgba(255,255,255,0.2);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Result card ──────────────────────────────────── */
+#result-card { display: none; }
+
+.result-icon {
+  font-size: 3rem;
+  text-align: center;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.result-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 4px;
+}
+
+.result-sub {
+  color: var(--muted);
+  font-size: 0.85rem;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.result-stats {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.stat-box {
+  flex: 1;
+  background: var(--surface2);
+  border-radius: 10px;
+  padding: 12px;
+  text-align: center;
+}
+
+.stat-value {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--green);
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.btn-green {
+  background: linear-gradient(135deg, var(--green), #22c55e);
+  color: #0f1a14;
+  box-shadow: 0 4px 20px rgba(67,217,162,0.25);
+}
+
+/* ── Error ────────────────────────────────────────── */
+#error-card { display: none; }
+
+.error-msg {
+  background: rgba(255,101,132,0.1);
+  border: 1px solid rgba(255,101,132,0.3);
+  border-radius: 10px;
+  padding: 12px 16px;
+  color: var(--accent2);
+  font-size: 0.88rem;
+  margin-bottom: 16px;
+}
+
+/* ── How it works ─────────────────────────────────── */
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.step {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.step-num {
+  flex-shrink: 0;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), #8b5cf6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.step-text strong { display: block; font-size: 0.9rem; margin-bottom: 1px; }
+.step-text span { color: var(--muted); font-size: 0.82rem; }
+
+/* ── Install banner ───────────────────────────────── */
+#install-banner {
+  display: none;
+  width: 100%;
+  max-width: 560px;
+  background: linear-gradient(135deg, rgba(108,99,255,0.15), rgba(139,92,246,0.1));
+  border: 1px solid rgba(108,99,255,0.3);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin-bottom: 16px;
+  align-items: center;
+  gap: 14px;
+}
+
+#install-banner .ib-icon { font-size: 1.8rem; flex-shrink: 0; }
+#install-banner .ib-text { flex: 1; }
+#install-banner .ib-text strong { display: block; font-size: 0.9rem; }
+#install-banner .ib-text span { color: var(--muted); font-size: 0.8rem; }
+#install-banner .ib-btn {
+  flex-shrink: 0;
+  padding: 8px 16px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-mark">🧹</div>
+  <h1>Paper<span>Wiper</span></h1>
+  <p class="tagline">Remove student handwriting from scanned exam papers</p>
+</header>
+
+<!-- Install banner (shown on iOS Safari) -->
+<div id="install-banner">
+  <span class="ib-icon">📲</span>
+  <div class="ib-text">
+    <strong>Add to Home Screen</strong>
+    <span>Tap Share → "Add to Home Screen" for app experience</span>
+  </div>
+</div>
+
+<!-- Upload card -->
+<div class="card" id="upload-card">
+  <div class="card-title">Upload Paper</div>
+
+  <div id="drop-zone">
+    <input type="file" id="file-input" accept=".pdf" />
+    <span class="icon">📄</span>
+    <div class="primary-text">Drag & drop PDF here</div>
+    <div class="secondary-text">or tap to browse · max 50 MB</div>
+  </div>
+
+  <div id="file-pill">
+    <span class="file-icon">📋</span>
+    <div class="file-info">
+      <div class="file-name" id="pill-name">—</div>
+      <div class="file-size" id="pill-size">—</div>
+    </div>
+    <button class="remove-btn" id="remove-btn" title="Remove">✕</button>
+  </div>
+
+  <button class="btn btn-primary" id="process-btn" disabled>
+    ✨ &nbsp;Wipe Handwriting
+  </button>
+</div>
+
+<!-- Progress card -->
+<div class="card" id="progress-card">
+  <div class="card-title">Processing</div>
+  <div class="progress-label">
+    <span id="prog-text">Analysing page 1…</span>
+    <span id="prog-pct">0%</span>
+  </div>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-fill" id="prog-bar"></div>
+  </div>
+  <div style="color:var(--muted); font-size:0.82rem; margin-top:8px;">
+    Detecting handwriting and restoring blank lines…
+  </div>
+</div>
+
+<!-- Result card -->
+<div class="card" id="result-card">
+  <span class="result-icon">✅</span>
+  <div class="result-title">Paper Cleaned Successfully!</div>
+  <div class="result-sub" id="result-sub">All handwriting has been removed.</div>
+
+  <div class="result-stats">
+    <div class="stat-box">
+      <div class="stat-value" id="stat-pages">—</div>
+      <div class="stat-label">Pages</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-value" id="stat-wiped">—</div>
+      <div class="stat-label">% Wiped</div>
+    </div>
+  </div>
+
+  <button class="btn btn-green" id="download-btn">
+    ⬇️ &nbsp;Download Clean PDF
+  </button>
+  <button class="btn btn-ghost" id="preview-btn" style="margin-top:10px">
+    👁 &nbsp;Download Preview (with red highlights)
+  </button>
+  <button class="btn btn-ghost" id="restart-btn" style="margin-top:10px">
+    🔄 &nbsp;Process Another Paper
+  </button>
+</div>
+
+<!-- Error card -->
+<div class="card" id="error-card">
+  <div class="card-title">Something went wrong</div>
+  <div class="error-msg" id="error-msg">An unexpected error occurred.</div>
+  <button class="btn btn-ghost" id="error-retry-btn">↩ Try Again</button>
+</div>
+
+<!-- How it works -->
+<div class="card">
+  <div class="card-title">How It Works</div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-text">
+        <strong>Scan & Upload</strong>
+        <span>Scan the student's paper to PDF and upload it here</span>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-text">
+        <strong>AI Detection</strong>
+        <span>Computer vision identifies all handwritten content — Chinese, English, numbers, circles</span>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-text">
+        <strong>Smart Wipe</strong>
+        <span>Handwriting removed while preserving printed questions, lines, and diagrams</span>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-text">
+        <strong>Download & Print</strong>
+        <span>Get a clean PDF ready to print and reuse</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── State ─────────────────────────────────────────────────────────────
+let selectedFile = null;
+let currentJobId = null;
+let pollTimer    = null;
+
+// ── Elements ──────────────────────────────────────────────────────────
+const dropZone    = document.getElementById('drop-zone');
+const fileInput   = document.getElementById('file-input');
+const filePill    = document.getElementById('file-pill');
+const pillName    = document.getElementById('pill-name');
+const pillSize    = document.getElementById('pill-size');
+const removeBtn   = document.getElementById('remove-btn');
+const processBtn  = document.getElementById('process-btn');
+const uploadCard  = document.getElementById('upload-card');
+const progressCard= document.getElementById('progress-card');
+const resultCard  = document.getElementById('result-card');
+const errorCard   = document.getElementById('error-card');
+const progText    = document.getElementById('prog-text');
+const progPct     = document.getElementById('prog-pct');
+const progBar     = document.getElementById('prog-bar');
+const statPages   = document.getElementById('stat-pages');
+const statWiped   = document.getElementById('stat-wiped');
+const downloadBtn = document.getElementById('download-btn');
+const previewBtn  = document.getElementById('preview-btn');
+const restartBtn  = document.getElementById('restart-btn');
+const errorMsg    = document.getElementById('error-msg');
+const errorRetry  = document.getElementById('error-retry-btn');
+
+// ── File selection ────────────────────────────────────────────────────
+function formatBytes(b) {
+  if (b < 1024) return b + ' B';
+  if (b < 1048576) return (b/1024).toFixed(1) + ' KB';
+  return (b/1048576).toFixed(1) + ' MB';
+}
+
+function setFile(file) {
+  if (!file || !file.name.toLowerCase().endsWith('.pdf')) {
+    alert('Please select a PDF file.');
+    return;
+  }
+  selectedFile = file;
+  pillName.textContent = file.name;
+  pillSize.textContent = formatBytes(file.size);
+  filePill.style.display = 'flex';
+  processBtn.disabled = false;
+}
+
+fileInput.addEventListener('change', e => {
+  if (e.target.files[0]) setFile(e.target.files[0]);
+});
+
+dropZone.addEventListener('dragover', e => {
+  e.preventDefault();
+  dropZone.classList.add('drag-over');
+});
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('drag-over');
+  const f = e.dataTransfer.files[0];
+  if (f) setFile(f);
+});
+
+removeBtn.addEventListener('click', () => {
+  selectedFile = null;
+  fileInput.value = '';
+  filePill.style.display = 'none';
+  processBtn.disabled = true;
+});
+
+// ── Upload & process ──────────────────────────────────────────────────
+processBtn.addEventListener('click', async () => {
+  if (!selectedFile) return;
+
+  showCard('progress');
+  setProgress(0, 1);
+
+  const form = new FormData();
+  form.append('file', selectedFile);
+
+  try {
+    const res  = await fetch('/api/upload', { method: 'POST', body: form });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Upload failed');
+    currentJobId = data.job_id;
+    pollStatus();
+  } catch (err) {
+    showError(err.message);
+  }
+});
+
+// ── Polling ───────────────────────────────────────────────────────────
+function pollStatus() {
+  clearInterval(pollTimer);
+  pollTimer = setInterval(async () => {
+    try {
+      const res  = await fetch(`/api/status/${currentJobId}`);
+      const data = await res.json();
+
+      if (data.status === 'processing') {
+        setProgress(data.progress, data.total);
+      } else if (data.status === 'done') {
+        clearInterval(pollTimer);
+        showResult(data.stats);
+      } else if (data.status === 'error') {
+        clearInterval(pollTimer);
+        showError(data.error || 'Processing failed');
+      }
+    } catch (err) {
+      clearInterval(pollTimer);
+      showError('Lost connection to server');
+    }
+  }, 1500);
+}
+
+// ── UI helpers ────────────────────────────────────────────────────────
+function showCard(which) {
+  uploadCard.style.display   = which === 'upload'   ? 'block' : 'none';
+  progressCard.style.display = which === 'progress' ? 'block' : 'none';
+  resultCard.style.display   = which === 'result'   ? 'block' : 'none';
+  errorCard.style.display    = which === 'error'    ? 'block' : 'none';
+}
+
+function setProgress(current, total) {
+  const pct = total > 0 ? Math.round((current / total) * 100) : 0;
+  progBar.style.width  = pct + '%';
+  progPct.textContent  = pct + '%';
+  progText.textContent = total > 1
+    ? `Analysing page ${current} of ${total}…`
+    : 'Detecting handwriting…';
+}
+
+function showResult(stats) {
+  statPages.textContent = stats?.pages   ?? '—';
+  statWiped.textContent = stats?.wiped_percent != null
+    ? stats.wiped_percent + '%' : '—';
+  showCard('result');
+}
+
+function showError(msg) {
+  errorMsg.textContent = msg;
+  showCard('error');
+}
+
+// ── Downloads ─────────────────────────────────────────────────────────
+downloadBtn.addEventListener('click', () => {
+  window.location.href = `/api/download/${currentJobId}/clean`;
+});
+previewBtn.addEventListener('click', () => {
+  window.location.href = `/api/download/${currentJobId}/preview`;
+});
+
+// ── Reset ─────────────────────────────────────────────────────────────
+function reset() {
+  selectedFile = null;
+  currentJobId = null;
+  fileInput.value = '';
+  filePill.style.display = 'none';
+  processBtn.disabled = true;
+  showCard('upload');
+}
+
+restartBtn.addEventListener('click', reset);
+errorRetry.addEventListener('click', reset);
+
+// ── iOS install banner ────────────────────────────────────────────────
+const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
+const isStandalone = window.navigator.standalone;
+if (isIos && !isStandalone) {
+  document.getElementById('install-banner').style.display = 'flex';
+}
+
+// Initial state
+showCard('upload');
+</script>
+</body>
+</html>
